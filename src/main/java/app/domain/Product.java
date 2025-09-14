@@ -1,4 +1,10 @@
 package app.domain;
+/*
+
+Этот класс находится на первом слое нашего приложения - домен.
+Домен содержит классы, описывающие сущности, с которыми работает приложение.
+В нашем случае это Продукт и Покупатель.
+ */
 
 import java.util.Objects;
 
@@ -8,6 +14,38 @@ public class Product {
     private String title;
     private double price;
     private boolean active;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     @Override
     public boolean equals(Object o) {
