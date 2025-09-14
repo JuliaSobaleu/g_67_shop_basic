@@ -10,6 +10,13 @@ public class Customer {
     private boolean active;
     private List<Product> cart = new ArrayList<>();
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public boolean equals(Object o) {
