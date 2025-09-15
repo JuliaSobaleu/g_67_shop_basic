@@ -15,6 +15,8 @@ public class Product {
     private double price;
     private boolean active;
 
+
+
     public Long getId() {
         return id;
     }
@@ -46,6 +48,8 @@ public class Product {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+
 
     @Override
     public boolean equals(Object o) {
