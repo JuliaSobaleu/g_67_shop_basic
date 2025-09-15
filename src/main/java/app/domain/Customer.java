@@ -10,6 +10,24 @@ public class Customer {
     private boolean active;
     private List<Product> cart = new ArrayList<>();
 
+
+
+    public List<Product> getCart() {
+        return cart;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
