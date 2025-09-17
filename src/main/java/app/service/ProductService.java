@@ -1,4 +1,12 @@
 package app.service;
+import app.domain.Product;
+import app.exceptions.ProductNotFoundException;
+import app.exceptions.ProductSaveException;
+import app.exceptions.ProductUpdateException;
+import app.repository.ProductRepository;
+
+import java.util.List;
+
 /*
 Этот класс находится на третьем слое нашего приложения - слой сервисов.
 Сервисы содержат всю бизнес-логику, то есть логику по всей необходимой
@@ -6,30 +14,33 @@ package app.service;
 Сервис не имеет прямого доступа к базе данных.
 Чтобы работать с данными, сервис обращается к репозиторию.
  */
-
-import app.domain.Product;
-import app.exceptions.ProductNotFoundException;
-import app.exceptions.ProductSaveException;
-import app.exceptions.ProductUpdateException;
-import app.repository.ProductRepository;
-
-import java.awt.print.PrinterException;
-import java.util.List;
-
 public class ProductService {
 
+    private static ProductService instance;
     private final ProductRepository repository = new ProductRepository();
 
-    //    Сохранить продукт в базе данных (при сохранении продукт автоматически считается активным).
+    private ProductService() {
 
+    }
+
+    public static ProductService getInstance() {
+        if (instance == null) {
+            instance = new ProductService();
+        }
+        return instance;
+    }
+
+    //    Сохранить продукт в базе данных (при сохранении продукт автоматически считается активным).
     public Product save(Product product) {
         if (product == null) {
             throw new ProductSaveException("Продукт не может быть null");
         }
+
         String title = product.getTitle();
         if (title == null || title.trim().isEmpty()) {
             throw new ProductSaveException("Наименование продукта не должно быть пустым");
         }
+
         if (product.getPrice() < 0) {
             throw new ProductSaveException("Цена продукта не должна быть отрицательной");
         }
@@ -49,11 +60,12 @@ public class ProductService {
     //    Вернуть один продукт из базы данных по его идентификатору (если он активен).
     public Product getActiveProductById(Long id) {
         Product product = repository.findById(id);
+
         if (product == null || !product.isActive()) {
             throw new ProductNotFoundException(id);
         }
-        return product;
 
+        return product;
     }
 
     //    Изменить один продукт в базе данных по его идентификатору.
@@ -61,6 +73,7 @@ public class ProductService {
         if (newPrice < 0) {
             throw new ProductUpdateException("Цена продукта не должна быть отрицательной");
         }
+
         repository.update(id, newPrice);
     }
 
@@ -85,6 +98,7 @@ public class ProductService {
         if (product == null) {
             throw new ProductNotFoundException(id);
         }
+
         product.setActive(true);
     }
 
@@ -94,13 +108,15 @@ public class ProductService {
     }
 
     //    Вернуть суммарную стоимость всех продуктов в базе данных (активных).
-    public double getActiveProductsCoast() {
+    public double getActiveProductsTotalCost() {
         // 1 способ. Цикл.
-        //double sum = 0.0;
-        //for (Product product : getAllActiveProducts()) {
-        //   sum += product.getPrice();
-        // }
-        //return sum;
+//        double sum = 0.0;
+//        for (Product product : getAllActiveProducts()) {
+//            sum += product.getPrice();
+//        }
+//        return sum;
+
+        // 2 способ. Стрим.
         return getAllActiveProducts()
                 .stream()
                 .mapToDouble(Product::getPrice)
@@ -109,14 +125,14 @@ public class ProductService {
 
     //    Вернуть среднюю стоимость продукта в базе данных (из активных).
     public double getActiveProductsAveragePrice() {
-
         // Способ 1. С использованием предыдущих методов.
-        //        int productCount = getActiveProductsCount();
+//        int productCount = getActiveProductsCount();
 //
 //        if (productCount == 0) {
 //            return 0.0;
 //        }
-//          return getActiveProductsTotalCost() / productCount;
+//
+//        return getActiveProductsTotalCost() / productCount;
 
         // Способ 2. Стрим.
         return getAllActiveProducts()
@@ -124,6 +140,5 @@ public class ProductService {
                 .mapToDouble(Product::getPrice)
                 .average()
                 .orElse(0.0);
-
     }
 }
