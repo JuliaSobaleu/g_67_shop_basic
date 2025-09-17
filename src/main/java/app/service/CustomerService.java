@@ -1,5 +1,4 @@
 package app.service;
-
 import app.domain.Customer;
 import app.domain.Product;
 import app.exceptions.CustomerNotFoundException;
@@ -8,12 +7,11 @@ import app.exceptions.CustomerUpdateException;
 import app.repository.CustomerRepository;
 
 import java.util.List;
-import java.util.Objects;
 
 public class CustomerService {
 
     private final CustomerRepository repository = new CustomerRepository();
-    private final ProductService productService = new ProductService();
+    private final ProductService productService = ProductService.getInstance();
 
     //    Сохранить покупателя в базе данных (при сохранении покупатель автоматически считается активным).
     public Customer save(Customer customer) {
@@ -25,6 +23,7 @@ public class CustomerService {
         if (name == null || name.trim().isEmpty()) {
             throw new CustomerSaveException("Имя покупателя не должно быть пустым");
         }
+
         customer.setActive(true);
         return repository.save(customer);
     }
@@ -44,6 +43,7 @@ public class CustomerService {
         if (customer == null || !customer.isActive()) {
             throw new CustomerNotFoundException(id);
         }
+
         return customer;
     }
 
@@ -65,69 +65,72 @@ public class CustomerService {
     public void deleteByName(String name) {
         getAllActiveCustomers()
                 .stream()
-                .filter(x->x.getName().equals(name))
-                .forEach(x->x.setActive(false));
+                .filter(x -> x.getName().equals(name))
+                .forEach(x -> x.setActive(false));
     }
+
     //    Восстановить удалённого покупателя в базе данных по его идентификатору.
-    public void restorById(Long id){
+    public void restoreById(Long id) {
         Customer customer = repository.findById(id);
-        if (customer == null){
+
+        if (customer == null) {
             throw new CustomerNotFoundException(id);
         }
+
         customer.setActive(true);
     }
 
     //    Вернуть общее количество покупателей в базе данных (активных).
-    public int getActiveCustomerNumber(){
+    public int getActiveCustomersNumber() {
         return getAllActiveCustomers().size();
     }
 
     //    Вернуть стоимость корзины покупателя по его идентификатору (если он активен).
-    public double getCustomersCartTotalCost (Long customerId){
+    public double getCustomersCartTotalCost(Long customerId) {
         return getActiveCustomerById(customerId)
                 .getCart()
                 .stream()
                 .filter(Product::isActive)
-                .mapToDouble(Product:: getPrice)
+                .mapToDouble(Product::getPrice)
                 .sum();
     }
 
     //    Вернуть среднюю стоимость продукта в корзине покупателя по его идентификатору (если он активен)
-    public double getCustomerCartAveragePrice (Long customerId){
+    public double getCustomersCartAveragePrice(Long customerId) {
         return getActiveCustomerById(customerId)
                 .getCart()
                 .stream()
                 .filter(Product::isActive)
-                .mapToDouble(Product:: getPrice)
+                .mapToDouble(Product::getPrice)
                 .average()
                 .orElse(0.0);
     }
 
     //    Добавить товар в корзину покупателя по их идентификаторам (если оба активны)
-    public void addProductToCustomerCart(Long customerId, Long productId){
+    public void addProductToCustomersCart(Long customerId, Long productId) {
         Customer customer = getActiveCustomerById(customerId);
         Product product = productService.getActiveProductById(productId);
         customer.getCart().add(product);
-
     }
-    //    Удалить товар из корзины покупателя по их идентификаторам
-    public void removeProductFromCustomersCart(Long customerId, Long productId){
-        //Подход 1.
-       // Customer customer = getActiveCustomerById(customerId);
-        //customer.getCart().removeIf(x->x.getId().equals(productId));
 
-        // Подход 2.
+    //    Удалить товар из корзины покупателя по их идентификаторам
+    public void removeProductFromCustomersCart(Long customerId, Long productId) {
+        // Подход 1. Удаление всех продуктов одного наименования из корзины.
+//        Customer customer = getActiveCustomerById(customerId);
+//        customer.getCart().removeIf(x -> x.getId().equals(productId));
+
+        // Подход 2. Удаление только одного продукта нужного наименования.
         Customer customer = getActiveCustomerById(customerId);
         Product product = productService.getActiveProductById(productId);
         customer.getCart().remove(product);
     }
 
-
     //    Полностью очистить корзину покупателя по его идентификатору (если он активен)
-    public  void clearCustomerCart(Long customerId){
+    public void clearCustomersCart(Long customerId) {
         Customer customer = getActiveCustomerById(customerId);
         customer.getCart().clear();
     }
+
 
 }
 
